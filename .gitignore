@@ -83,3 +83,4 @@ Thumbs.db
 data/raw/
 *.csv
 *.parquet
+.github/workflows/
