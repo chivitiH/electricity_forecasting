@@ -79,4 +79,7 @@ tensorboard_logs/
 
 # 🌐 OS
 Thumbs.db
-.DS_Store
+.DS_Store# 📊 Données PJM (GROS FICHIERS - NE PAS UPLOAD)
+data/raw/
+*.csv
+*.parquet
