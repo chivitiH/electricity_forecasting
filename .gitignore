@@ -1,0 +1,82 @@
+# 🐍 Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# 🌍 Environnement virtuel
+venv/
+env/
+ENV/
+.venv/
+.env
+env.bak/
+venv.bak/
+
+# 📊 Données sensibles (NE PAS UPLOAD)
+data/raw/*.csv
+data/raw/*.xlsx
+data/raw/*.json
+data/processed/*.pkl
+data/processed/*.parquet
+data/models/*.pkl
+data/models/*.h5
+data/models/*.joblib
+*.pkl
+*.h5
+
+# 🔑 Credentials & Config
+.env
+.env.local
+config.ini
+secrets.json
+*.key
+*.pem
+
+# 📊 Jupyter
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+# 💻 IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# 📁 Logs & Temp
+*.log
+logs/
+temp/
+tmp/
+.cache/
+
+# 🐳 Docker
+.dockerignore
+
+# 📈 ML Artifacts
+wandb/
+mlruns/
+.mlflow/
+tensorboard_logs/
+
+# 🌐 OS
+Thumbs.db
+.DS_Store
