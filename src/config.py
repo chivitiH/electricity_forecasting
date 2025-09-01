@@ -4,12 +4,8 @@ Fichier: src/config.py
 Adapté pour dataset PJM réel de Kaggle + Optimisations Intel
 """
 
-# Intel optimizations (configuration corrigée)
-import os
-os.environ['SKLEARNEX_VERBOSE'] = 'INFO'  # Fix warning
-os.environ['MKL_NUM_THREADS'] = '16'      # Fix: spécifie 16 au lieu de 0
-os.environ['OMP_NUM_THREADS'] = '16'      # Fix: spécifie 16 au lieu de 0
-os.environ['MKL_DYNAMIC'] = 'TRUE'
+# Intel optimizations (utilise variables environnement permanentes)
+# Variables définies au niveau système Windows
 
 # Intel Extensions
 try:
@@ -21,12 +17,22 @@ except ImportError:
 
 try:
     import mkl
-    # Fix: utilise get_max_threads() au lieu de set_num_threads(0)
-    max_threads = mkl.get_max_threads()
-    mkl.set_num_threads(max_threads)  # Utilise tous les threads disponibles
-    print(f"Intel MKL configuré: {max_threads} threads")
+    import os
+    
+    # Lecture variables environnement
+    mkl_threads = os.environ.get('MKL_NUM_THREADS', '16')
+    cpu_count = os.cpu_count()
+    actual_threads = mkl.get_max_threads()
+    
+    print(f"Intel MKL: {actual_threads}/{cpu_count} threads (config: {mkl_threads})")
+    
+    if actual_threads == 16:
+        print("Performance MAXIMALE i7-1360P activée")
+    else:
+        print(f"Performance: {actual_threads}/16 threads")
+        
 except ImportError:
-    print("Intel MKL non disponible - installation requise")
+    print("Intel MKL non disponible")
 
 from pathlib import Path
 from typing import Dict, List, Optional

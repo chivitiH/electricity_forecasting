@@ -1,0 +1,38 @@
+{
+  "preprocessing_date": "2025-09-01T21:13:32.782376",
+  "region": "PJME",
+  "dataset_info": {
+    "total_hours": 144655,
+    "total_days": 6027.291666666667,
+    "train_samples": 143935,
+    "test_samples": 720,
+    "features_count": 85,
+    "date_range": {
+      "start": "2002-01-31T00:00:00",
+      "end": "2018-08-03T00:00:00"
+    }
+  },
+  "consumption_stats": {
+    "mean_mw": 32015.12188655767,
+    "median_mw": 31421.0,
+    "std_mw": 6277.742617573389,
+    "min_mw": 14544.0,
+    "max_mw": 54483.5,
+    "peak_to_avg_ratio": 1.7018051717265592
+  },
+  "patterns_detected": {
+    "total_peaks": 11262,
+    "peak_percentage": 7.785420483218693,
+    "avg_weekend_consumption": 29776.87181380262,
+    "avg_weekday_consumption": 32909.845806239355
+  },
+  "business_insights": {
+    "peak_hour": 19,
+    "off_peak_hour": 1,
+    "peak_month": 7,
+    "low_consumption_month": 4,
+    "weekend_vs_weekday_ratio": 0.9048013165761246,
+    "seasonal_variation_pct": 30.023206309227536,
+    "daily_variation_pct": 33.894967057532014
+  }
+}

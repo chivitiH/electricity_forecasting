@@ -4,26 +4,15 @@ Fichier: src/data_preprocessing.py
 Adapté pour dataset PJM réel (PJME_hourly.csv avec colonnes Datetime, PJME_MW)
 """
 import os
+os.environ['SKLEARNEX_VERBOSE'] = 'INFO'
+from sklearnex import patch_sklearn
+patch_sklearn()
 import warnings
 
-# Intel optimizations environment variables
-os.environ['SKLEARNEX_VERBOSE'] = '1'  # Log Intel optimizations
-os.environ['MKL_NUM_THREADS'] = '0'    # Use all cores
-os.environ['OMP_NUM_THREADS'] = '0'    # Use all cores
-os.environ['MKL_DYNAMIC'] = 'TRUE'     # Dynamic load balancing
-
-# Enable Intel Extension for Scikit-learn
-try:
-    from sklearnex import patch_sklearn
-    patch_sklearn()
-    print("✅ Intel Extension for Scikit-learn activé")
-except ImportError:
-    print("⚠️ Intel Extension non disponible - installation standard")
 
 # Intel optimizations for NumPy/Pandas
 try:
     import mkl
-    mkl.set_num_threads(0)  # Use all available cores
     print(f"✅ Intel MKL configuré: {mkl.get_max_threads()} threads")
 except ImportError:
     print("⚠️ Intel MKL non disponible")
@@ -151,7 +140,7 @@ class PJMPreprocessor:
         logger.info(f"  Température: {final_temperature.min():.1f}°C → {final_temperature.max():.1f}°C")
     
     def _generate_holidays_data(self) -> None:
-        """Génération jours fériés USA (région PJM)"""
+        """Génération jours fériés USA (région PJM) - Version corrigée"""
         logger.info("📅 Génération jours fériés USA...")
         
         if self.consumption_data is None:
@@ -166,17 +155,60 @@ class PJMPreprocessor:
         
         holiday_list = []
         for year in range(start_year, end_year + 1):
-            year_holidays = usa_holidays[year]
-            for date, name in year_holidays.items():
-                holiday_list.append({
-                    self.config.data.datetime_col: pd.Timestamp(date),
-                    'holiday_name': name,
-                    'is_holiday': 1,
-                    'holiday_type': self._classify_holiday_type(name)
-                })
+            try:
+                # Récupération holidays pour l'année
+                year_holidays = usa_holidays[year]
+                
+                # Vérification type retourné
+                if isinstance(year_holidays, dict):
+                    # Format dictionnaire normal
+                    for date, name in year_holidays.items():
+                        holiday_list.append({
+                            self.config.data.datetime_col: pd.Timestamp(date),
+                            'holiday_name': name,
+                            'is_holiday': 1,
+                            'holiday_type': self._classify_holiday_type(name)
+                        })
+                else:
+                    # Format alternatif - itération directe
+                    for holiday_date in usa_holidays.get_list(str(year)):
+                        holiday_name = usa_holidays.get(holiday_date, f"Holiday {holiday_date}")
+                        holiday_list.append({
+                            self.config.data.datetime_col: pd.Timestamp(holiday_date),
+                            'holiday_name': str(holiday_name),
+                            'is_holiday': 1,
+                            'holiday_type': self._classify_holiday_type(str(holiday_name))
+                        })
+                        
+            except Exception as e:
+                logger.warning(f"Erreur année {year}: {e}")
+                # Fallback holidays manually for year
+                manual_holidays = [
+                    f"{year}-01-01",  # New Year
+                    f"{year}-07-04",  # Independence Day  
+                    f"{year}-12-25",  # Christmas
+                ]
+                
+                for date_str in manual_holidays:
+                    try:
+                        holiday_list.append({
+                            self.config.data.datetime_col: pd.Timestamp(date_str),
+                            'holiday_name': 'Manual Holiday',
+                            'is_holiday': 1,
+                            'holiday_type': 'major'
+                        })
+                    except:
+                        continue
         
-        self.holidays_data = pd.DataFrame(holiday_list)
-        logger.info(f"✅ {len(holiday_list)} jours fériés générés ({start_year}-{end_year})")
+        if holiday_list:
+            self.holidays_data = pd.DataFrame(holiday_list)
+            logger.info(f"✅ {len(holiday_list)} jours fériés générés ({start_year}-{end_year})")
+        else:
+            # Fallback: pas de holidays
+            logger.warning("⚠️ Aucun jour férié généré - création DataFrame vide")
+            self.holidays_data = pd.DataFrame(columns=[
+                self.config.data.datetime_col, 'holiday_name', 'is_holiday', 'holiday_type'
+            ])
     
     def _classify_holiday_type(self, holiday_name: str) -> str:
         """Classification impact business des jours fériés"""
